@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
-import Login from '@/components/Login'
-import ContactList from '@/components/ContactList'
+import Login from '@/components/Login/Login'
+import ContactList from '@/components/ContactList/ContactList'
 
 Vue.use(Router)
 

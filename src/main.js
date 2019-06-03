@@ -5,12 +5,18 @@ import App from './App'
 import router from './router'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
-import VueSocketio from 'vue-socket.io';
+import VueSocketIO from 'vue-socket.io';
 import socketio from 'socket.io-client';
-Vue.use(VueSocketio, socketio('http://127.0.0.1:80'));        //IP填后台给的socket地址，端口号根据实际后台端口写
+
 
 Vue.config.productionTip = false
 Vue.use(ElementUI);
+//Vue.use(VueSocketio, socketio('http://localhost:8082'));        //IP填后台给的socket地址，端口号根据实际后台端口写--有bug
+
+Vue.use(new VueSocketIO({                                 
+      debug: true,
+      connection: 'http://localhost:8082'                                 //我用的这种方式，可行
+}))
 
 /* eslint-disable no-new */
 new Vue({
