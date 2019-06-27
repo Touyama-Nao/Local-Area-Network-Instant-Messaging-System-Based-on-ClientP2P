@@ -3,8 +3,8 @@
 	  <div class="mainPage">
     <div id="mainChat">
       <div id="friends">
-        <div class="downMenu">
-          <ul class="dropDown">
+        <div class="downMenu" >
+          <ul class="dropDown" v-if="IsDropDwon == true">
             <li>
               <a href="#" title="关闭桌面通知" class="dropCell" id="mainNotice">
                 <i class="notice"></i>
@@ -36,7 +36,7 @@
           <div class="info">
             <h3 class="nickname">
               <span class="user">?</span>
-              <a href="#" class="opt">
+              <a href="#" class="opt" @click="IsDropDwon = !IsDropDwon">
                 <i class="downLogo"></i>
               </a>
             </h3>
@@ -48,18 +48,18 @@
         </div>
         <div class="tab">
           <div class="tabElement">
-            <a href="#" title="聊天" class="talk">
-              <i class="talkBox"></i>
+            <a href="#" title="聊天" class="talk" @click="SwitchChooseNum = 1">
+              <i class="talkBox" :class="{talkBoxChoose:SwitchChooseNum == 1}"></i>
             </a>
           </div>
           <div class="tabElement">
-            <a href="#" title="阅读" class="read">
-              <i class="readBox"></i>
+            <a href="#" title="阅读" class="read" @click="SwitchChooseNum = 2">
+              <i class="readBox" :class="{readBoxChoose:SwitchChooseNum == 2}"></i>
             </a>
           </div>
           <div class="tabElement">
-            <a href="#" title="通讯录" class="phone">
-              <i class="phoneBox"></i>
+            <a href="#" title="通讯录" class="phone" @click="SwitchChooseNum = 3">
+              <i class="phoneBox" :class="{phoneBoxChoose:SwitchChooseNum == 3}"></i>
             </a>
           </div>
         </div>
@@ -67,7 +67,30 @@
           <div class="friendsListBox">
             <div class="friendsList">
               <div class="include">
-                <div class="target"></div>
+                <div class="target">
+<!-- 									<ul>
+     								<li
+        						v-for="item in usersList"
+        						:class="{ active: item.id === currentUserId }"
+        						@click="selectSession(item.id)"
+      							>
+        							<img class="avatar" width="30" height="30" :alt="item.user.name" :src="item.user.img">
+        							<p class="name">{{item.user.name}}</p>
+      							</li>
+   								 </ul> -->
+									<div class="peopleBox" v-for="item in usersList" v-show="SwitchChooseNum == 3">
+										<div class="peopleMain" :class="{ active: item.id === currentUserId }"  @click="ClickPeopleInfo(item)">
+											<div class="people">
+												<div class="peopleImg">
+													<img :src="item.user.img" :alt="item.user.name">
+												</div>
+												<div class="peopleNick">
+													<h4 class="peoplename">{{item.user.name}}</h4>
+												</div>
+											</div>
+										</div>
+								</div>
+								</div>
               </div>
             </div>
           </div>
@@ -77,7 +100,25 @@
             <div class="navList">
               <div class="nav">
                 <div class="peopleStar"></div>
-                <div class="peopleEnd"></div>
+                <div class="peopleEnd">
+									<div class="friendsBox" v-for="item in usersList" v-show="SwitchChooseNum == 1">
+										<div class="chatItem" :class="{ active: item.id === currentUserId }">
+											<div class="ext">
+												<p class="attr"></p>
+												</div><div class="avatar">
+													<img :src="item.user.img" :alt="item.user.name">
+												</div>
+												<div class="text">
+													<h3 class="chatNick">
+														<span class="chatNicktext" :alt="item.user.name">{{item.user.name}}</span>
+													</h3>
+													<p class="chatContent">
+														<span class="chatContenttext"></span>
+													</p>
+												</div>
+											</div>
+										</div>
+								</div>
               </div>
             </div>
           </div>
@@ -88,7 +129,7 @@
         <div class="chatPage">
           <div class="boxHead">
             <div class="membersWrap">
-              <div class="membersWrapBox slide-down">
+              <div class="membersWrapBox slide-down" v-if="membersWrapBoxIsShow == true">
                 <div class="memberBox">
                   <div class="memberMain">
                     <div class="member opt">
@@ -113,7 +154,7 @@
             <div class="figureBox">
               <i class="figureImg"></i>
             </div>
-            <div class="unitBox" style="display: none;">
+            <div class="unitBox" v-show="currentUserId != 0 && IsShowUserInfo == true">
               <div class="unit">
                 <div class="unitImg">
                   <img src="../../assets/iron.jpg">
@@ -140,24 +181,24 @@
                     <p class="age"></p>
                   </div>
                 </div>
-                <div class="actionBox">
+                <div class="actionBox" @click="UnitSendMsg()">
                   <a href="#" class="button">发消息</a>
                 </div>
               </div>
             </div>
-            <div class="irc" data-cm="{"type":"clean","username":""}">
+            <div class="irc">
               <div class="chatMessageBox">
                 <div class="messageStar"></div>
                 <div class="messageEnd"></div>
               </div>
-              <div class="point">
+              <div class="point" v-if="currentUserId == 0">
                 <i class="faceImg"></i>
                 <p class="nomessage news">暂时没有新消息</p>
                 <p class="cue">未选择聊天</p>
               </div>
             </div>
           </div>
-          <div class="send">
+          <div class="send" v-show=" IsSendShow == true">
             <div class="toolbar">
               <a href="#" title="表情" class="look"></a>
               <a href="#" title="截屏" class="screen"></a>
@@ -175,12 +216,12 @@
         </div>
       </div>
     </div>
-<!--     <div id="help">
+    <div id="help">
       <div class="copr-2">
         © 1998 - 2019 Tencent Inc. All Rights Reserved
         <span class="cut-1 cut-2"></span>帮助
       </div>
-    </div> -->
+    </div>
   </div>
 </div>
 </template>
@@ -190,7 +231,33 @@ export default{
 	name:"chat",
 	data() {
 		return{
-
+			IsDropDwon:false,	//下拉框是否出现
+			SwitchChooseNum: 1,	//阅读,聊天,通讯录选择序号
+			usersList: [	//存放用户列表
+        {
+          id:1,
+					user:{
+						name:"珊莎史塔克",
+						img:require("../../assets/otherhead.jpg")
+					}
+        }
+      ],
+			currentUserId:0,		//存放用户列表的当前选中的位数
+			IsShowUserInfo: true, //确保用户信息页是否显示
+			IsSendShow: false,
+			membersWrapBoxIsShow: false,
+		}
+	},
+	methods:{
+		ClickPeopleInfo(item){
+			this.IsSendShow = false;
+			this.IsShowUserInfo = true;
+			this.currentUserId = item.user.id;
+		},
+		UnitSendMsg(){	//在联系人详情页按下发送消息键
+		console.log(1);
+			this.IsShowUserInfo = false;
+			this.IsSendShow = true;
 		}
 	}
 }
@@ -213,7 +280,7 @@ a,button{
 	height: 100%;
 }
 .active{
-	background-color: #3a3f45;
+	background-color: #3a3f45!important;
 	color: #fff;
 }
 .loginPage{
@@ -508,9 +575,12 @@ a,button{
 }
 .talkBox{
 	background: url(../../assets/logoAll.png) no-repeat;
-    background-position: -185px -96px;
+    background-position: -150px -96px;
     -webkit-background-size: 487px 462px;
     background-size: 487px 462px;
+}
+.talkBoxChoose{
+    background-position: -185px -96px;
 }
 .readBox{
 	background: url(../../assets/logoAll.png) no-repeat;
@@ -518,11 +588,17 @@ a,button{
     -webkit-background-size: 487px 462px;
     background-size: 487px 462px;
 }
+.readBoxChoose{
+    background-position: -304px -281px;
+}
 .phoneBox{
 	background: url(../../assets/logoAll.png) no-repeat;
     background-position: -220px -96px;
     -webkit-background-size: 487px 462px;
     background-size: 487px 462px;
+}
+.phoneBoxChoose{
+    background-position: -304px -246px;
 }
 #chat{
 	height: 100%;
@@ -642,7 +718,7 @@ a,button{
 	display: none;
 }
 .send{
-	display: none;
+/* 	display: none; */
 	height: 180px;
     margin-right: 19px;
     border-top: 1px solid #d6d6d6;
@@ -658,6 +734,7 @@ a,button{
 .look,
 .screen,
 .photo{
+	float: left;
 	display: inline-block;
 	width: 30px;
     height: 30px;
@@ -748,7 +825,7 @@ a,button{
     width: 180px;
 }
 .dropDown{
-	display: none;
+/* 	display: none; */
 	background-color: #fff;
     border-radius: 4px;
     -moz-border-radius: 4px;
@@ -959,6 +1036,7 @@ a,button{
 .target{
 	height: 0px;
 }
+
 .friendsBox{
 	cursor: pointer;
 }
@@ -1416,7 +1494,7 @@ a,button{
     display: none !important;
 }
 .membersWrapBox{
-	display: none;
+/* 	display: none; */
 	top: 50px;
     margin-top: 1px;
     box-shadow: 1px 1px 1px #e0e0e0;
