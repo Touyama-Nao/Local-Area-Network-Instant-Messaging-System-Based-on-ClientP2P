@@ -6,7 +6,7 @@ export default {
         return{
             user:{
                 name:"萧俊威",
-                
+                img:require("../../assets/otherhead.jpg")
             }
         }
     }

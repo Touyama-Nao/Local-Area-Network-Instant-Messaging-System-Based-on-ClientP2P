@@ -32,13 +32,13 @@ export default {
 
 <template>
   <div class="message" v-scroll-bottom="messages">
-    <ul v-if="session">
+    <ul>
       <li v-for="item in messages">
         <p class="time">
           <span>{{ item.date | time }}</span>
         </p>
         <div class="main" :class="{ self: item.self }">
-          <img class="avatar" width="30" height="30" :src="item.self ? user.img : session.user.img">
+<!--           <img class="avatar" width="30" height="30" :src="item.self ? user.img : session.user.img"> -->
           <div class="text">{{ item.content }}</div>
         </div>
       </li>

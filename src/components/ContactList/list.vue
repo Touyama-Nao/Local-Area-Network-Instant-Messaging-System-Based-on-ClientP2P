@@ -22,11 +22,17 @@ export default {
           id:0,
 					user:{
 						name:"数据结构",
-						img:"../../assets/otherhead.jpg"
+						img:require("../../assets/otherhead.jpg")
 					}
         }
-      ]
+      ],
+      currentId:0,
     };
+  },
+  methods:{
+    selectSession(Id){
+      
+    }
   }
 };
 </script>
