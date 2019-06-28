@@ -35,7 +35,7 @@
           </div>
           <div class="info">
             <h3 class="nickname">
-              <span class="user">?</span>
+              <span class="user">{{MyInfo.username}}</span>
               <a href="#" class="opt" @click="IsDropDwon = !IsDropDwon">
                 <i class="downLogo"></i>
               </a>
@@ -232,10 +232,15 @@ export default{
 	data() {
 		return{
 			IsDropDwon:false,	//下拉框是否出现
-			SwitchChooseNum: 1,	//阅读,聊天,通讯录选择序号
+      SwitchChooseNum: 1,	//阅读,聊天,通讯录选择序号
+      MyInfo:{  //用于存放本人信息
+        username:"",
+        IP:"",
+      },
 			usersList: [	//存放用户列表
         {
           id:1,
+          IPAddress:"",
 					user:{
 						name:"珊莎史塔克",
 						img:require("../../assets/otherhead.jpg")
@@ -247,7 +252,11 @@ export default{
 			IsSendShow: false,
 			membersWrapBoxIsShow: false,
 		}
-	},
+  },
+  mounted(){
+    this.MyInfo.username = this.$route.query.username;
+    this.MyInfo.IP = this.$route.query.IP;
+  },
 	methods:{
 		ClickPeopleInfo(item){
 			this.IsSendShow = false;
@@ -255,11 +264,36 @@ export default{
 			this.currentUserId = item.user.id;
 		},
 		UnitSendMsg(){	//在联系人详情页按下发送消息键
-		console.log(1);
 			this.IsShowUserInfo = false;
 			this.IsSendShow = true;
-		}
-	}
+    },
+    
+  },
+    sockets: {      //服务端触发客户端这边的事件
+    ClientLogin(value) {
+      var that = this;
+      console.log(value);
+      var username = value.User.name; //根据格式获得名字
+      var IP = value.User.IP;
+      console.log(IP);
+      var item = {  //用户列表中的数据格式
+        id: IP,
+        IPAddress: IP,
+        user:{
+          name: username,
+          img:require("../../assets/otherhead.jpg")
+        }
+      };
+      this.usersList.map(function(value, index, array) {
+        console.log(value);
+        if (value.IPAddress != IP && IP != that.MyInfo.IP) { //通过IP判断这个人是否重复
+          //如果遍历列表之后发现没有这个人的话
+          that.usersList.push(item); //在用户列表中加入这个人
+        }
+      });
+      console.log(that.usersList);
+    }
+  },
 }
 </script>
 

@@ -35,7 +35,14 @@
     <!-- 登录 -->
     <div class="logIn">
       <h2 class="title">SIGN IN</h2>
-      <input type="text" name="username" placeholder="USERNAME" class="logIn-input" id="username" v-model="LoginForm.name">
+      <input
+        type="text"
+        name="username"
+        placeholder="USERNAME"
+        class="logIn-input"
+        id="username"
+        v-model="LoginForm.name"
+      >
       <input
         type="text"
         name="ip"
@@ -56,12 +63,28 @@
     </div>
     <span class="middle"></span>
     <canvas id="canvas">您的浏览器不支持，请升级最新的版本!</canvas>
+    <remote-js src="http://pv.sohu.com/cityjson?ie=utf-8"></remote-js>
   </div>
 </template>
+
+
+
 
 <script>
 export default {
   name: "Login",
+  components: {
+    "remote-js": {
+      render(createElement) {
+        return createElement("script", {
+          attrs: { type: "text/javascript", src: this.src }
+        });
+      },
+      props: {
+        src: { type: String, required: true }
+      }
+    }
+  },
   data() {
     return {
       labelPosition: "left",
@@ -76,82 +99,70 @@ export default {
         d_radius: 100, //粒子距离鼠标点的距离
         array: [] //保存n个圆形粒子对象
       },
-      Ipaddress:"",
+      Ipaddress: ""
     };
+  },
+  sockets: {
+    getIPAdress(data) {
+      //将获取到的IP地址填入input中
+      console.log()
+      this.Ipaddress = data.User.IP;
+    }
   },
   methods: {
     onLoginSubmit() {
       //this.isShowLogin = false;
-      this.$router.push("/ContactList");
-      this.$socket.emit("ServerLogin", { username: this.LoginForm.name });
+/*       console.log(returnCitySN["cip"]); */
+      this.$router.push({
+      　　　　path: '/Chat', query:{username:this.LoginForm.name,IP:this.Ipaddress}
+       　　 });
+      this.$socket.emit("ServerLogin", { username: this.LoginForm.name }); //登陆触发服务端的函数
     },
     resetForm(formName) {
       //重置登陆
       this.$refs[formName].resetFields();
     },
-      getUserIP(onNewIP) {
-    //获取当前局域网的ip地址
-    let MyPeerConnection =
-      window.RTCPeerConnection ||
-      window.mozRTCPeerConnection ||
-      window.webkitRTCPeerConnection;
-    let pc = new MyPeerConnection({
-      iceServers: []
-    });
-    let noop = () => {};
-    let localIPs = {};
-    let ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/g;
-    let iterateIP = ip => {
-      if (!localIPs[ip]) onNewIP(ip);
-      localIPs[ip] = true;
-    };
-    pc.createDataChannel("");
-    pc.createOffer()
-      .then(sdp => {
-        sdp.sdp.split("\n").forEach(function(line) {
-          if (line.indexOf("candidate") < 0) return;
-          line.match(ipRegex).forEach(iterateIP);
-        });
-        pc.setLocalDescription(sdp, noop, noop);
-      })
-      .catch(reason => {});
-    pc.onicecandidate = ice => {
-      if (
-        !ice ||
-        !ice.candidate ||
-        !ice.candidate.candidate ||
-        !ice.candidate.candidate.match(ipRegex)
-      )
-        return;
-      ice.candidate.candidate.match(ipRegex).forEach(iterateIP);
-    };
-  },
-  },
-  sockets: {
-    ClientLogin(value) {
-      //服务端触发客户端这边的事件
-      console.log(value);
-      var isChage = false;
-      var username = value.name.split(":")[1]; //根据格式获得名字
-      var IP = value.IP;
-      var item = {
-        IP: IP,
-        username: username
-      };
-      this.UsersList.map(function(value, index, array) {
-        if (value.IP == IP) {
-          //通过IP判断这个人是否重复
-          isChage = true;
-        }
+    getUserIP(onNewIP) {  //弃用，这是另一个IP地址
+      //获取当前局域网的ip地址
+      let MyPeerConnection =
+        window.RTCPeerConnection ||
+        window.mozRTCPeerConnection ||
+        window.webkitRTCPeerConnection;
+      let pc = new MyPeerConnection({
+        iceServers: []
       });
-      if (!isChage) {
-        //如果遍历列表之后发现没有这个人的话
-        this.UsersList.push(item); //在用户列表中加入这个人
-      }
+      let noop = () => {};
+      let localIPs = {};
+      let ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/g;
+      let iterateIP = ip => {
+        if (!localIPs[ip]) onNewIP(ip);
+        localIPs[ip] = true;
+      };
+      pc.createDataChannel("");
+      pc.createOffer()
+        .then(sdp => {
+          sdp.sdp.split("\n").forEach(function(line) {
+            if (line.indexOf("candidate") < 0) return;
+            line.match(ipRegex).forEach(iterateIP);
+          });
+          pc.setLocalDescription(sdp, noop, noop);
+        })
+        .catch(reason => {});
+      pc.onicecandidate = ice => {
+        if (
+          !ice ||
+          !ice.candidate ||
+          !ice.candidate.candidate ||
+          !ice.candidate.candidate.match(ipRegex)
+        )
+          return;
+        ice.candidate.candidate.match(ipRegex).forEach(iterateIP);
+      };
     }
   },
   mounted() {
-    var that = this;
+
+ /*    var that = this;
     window.requestAnimFrame = (function() {
       return (
         window.requestAnimationFrame ||
@@ -299,7 +310,7 @@ export default {
       drawDots();
       requestAnimFrame(animateDots);
     }
-    animateDots();
+    animateDots(); */
 
     /*     can.onmousemove = function(ev) {
       var ev = ev || window.event;
@@ -310,9 +321,10 @@ export default {
       mousePosition.x = can.width / 2;
       mousePosition.y = can.height / 2;
     }; */
-    this.getUserIP(ip => {  //将获取到的IP地址填入input中
+    /*     this.getUserIP(ip => {
+      //将获取到的IP地址填入input中
       this.Ipaddress = ip;
-    });
+    }); */
   }
 };
 </script>
