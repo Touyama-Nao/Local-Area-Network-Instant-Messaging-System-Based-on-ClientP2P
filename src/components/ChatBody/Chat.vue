@@ -275,6 +275,7 @@ export default{
       console.log(value);
       var username = value.User.name; //根据格式获得名字
       var IP = value.User.IP;
+      var isChange = false;
       console.log(IP);
       var item = {  //用户列表中的数据格式
         id: IP,
@@ -286,12 +287,15 @@ export default{
       };
       this.usersList.map(function(value, index, array) {
         console.log(value);
-        if (value.IPAddress != IP && IP != that.MyInfo.IP) { //通过IP判断这个人是否重复
-          //如果遍历列表之后发现没有这个人的话
-          that.usersList.push(item); //在用户列表中加入这个人
+        if (value.IPAddress == IP || IP == that.MyInfo.IP) { //通过IP判断这个人是否重复
+          isChange = true;
         }
       });
       console.log(that.usersList);
+      if(isChange == false){
+          //如果遍历列表之后发现没有这个人的话
+          that.usersList.push(item); //在用户列表中加入这个人
+      }
     }
   },
 }
