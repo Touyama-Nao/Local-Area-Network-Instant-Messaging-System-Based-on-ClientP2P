@@ -79,7 +79,7 @@
       							</li>
    								 </ul> -->
 									<div class="peopleBox" v-for="item in usersList" v-show="SwitchChooseNum == 3">
-										<div class="peopleMain" :class="{ active: item.id === currentUserId }"  @click="ClickPeopleInfo(item)">
+										<div class="peopleMain" :class="{ active: item.id == currentUserId }"  @click="ClickPeopleInfo(item)">
 											<div class="people">
 												<div class="peopleImg">
 													<img :src="item.user.img" :alt="item.user.name">
@@ -137,16 +137,16 @@
                     </div>
                     <div class="member">
                       <img src="../../assets/iron.jpg" class="memberImg">
-                      <p class="memberName"></p>
+                      <p class="memberName">{{memberName}}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="call">
+            <div class="call" v-show="isDownShow">
               <div class="titleWrap">
-                <a href="#" class="titleName"></a>
-                <i class="down"></i>
+                <a href="#" class="titleName">{{memberName}}</a>
+                <i class="down" style="width:10px;height:10px;" @click="membersWrapBoxIsShow = !membersWrapBoxIsShow"></i>
               </div>
             </div>
           </div>
@@ -238,19 +238,21 @@ export default{
         IP:"",
       },
 			usersList: [	//存放用户列表
-        {
+/*         {
           id:1,
           IPAddress:"",
 					user:{
 						name:"珊莎史塔克",
 						img:require("../../assets/otherhead.jpg")
 					}
-        }
+        } */
       ],
 			currentUserId:0,		//存放用户列表的当前选中的位数
 			IsShowUserInfo: true, //确保用户信息页是否显示
 			IsSendShow: false,
-			membersWrapBoxIsShow: false,
+      membersWrapBoxIsShow: false,
+      memberName:"xiao",
+      isDownShow: false,  //聊天框上面的人名
 		}
   },
   mounted(){
@@ -261,11 +263,15 @@ export default{
 		ClickPeopleInfo(item){
 			this.IsSendShow = false;
 			this.IsShowUserInfo = true;
-			this.currentUserId = item.user.id;
+      this.currentUserId = item.id;
+      this.memberName = item.user.name;
+      this.isDownShow = false;
 		},
 		UnitSendMsg(){	//在联系人详情页按下发送消息键
 			this.IsShowUserInfo = false;
-			this.IsSendShow = true;
+      this.IsSendShow = true;
+      this.membersWrapBoxIsShow = false;
+      this.isDownShow = true;
     },
     
   },
@@ -276,7 +282,6 @@ export default{
       var username = value.User.name; //根据格式获得名字
       var IP = value.User.IP;
       var isChange = false;
-      console.log(IP);
       var item = {  //用户列表中的数据格式
         id: IP,
         IPAddress: IP,
@@ -285,6 +290,11 @@ export default{
           img:require("../../assets/otherhead.jpg")
         }
       };
+      console.log(that.usersList);
+      if(that.usersList == []){
+        console.log(1);
+        isChange = true;
+      }
       this.usersList.map(function(value, index, array) {
         console.log(value);
         if (value.IPAddress == IP || IP == that.MyInfo.IP) { //通过IP判断这个人是否重复
@@ -694,8 +704,9 @@ a,button{
     font-weight: 400;
 }
 .down{
-	display: none;
+/* 	display: none; */
     vertical-align: middle;
+    display: inline-block!important;
     width: 10px;
     height: 10px;
     background: url(../../assets/logoAll.png) no-repeat;
