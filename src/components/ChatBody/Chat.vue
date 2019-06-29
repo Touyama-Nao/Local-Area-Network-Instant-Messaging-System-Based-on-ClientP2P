@@ -253,6 +253,20 @@ export default{
       membersWrapBoxIsShow: false,
       memberName:"xiao",
       isDownShow: false,  //聊天框上面的人名
+      SendContent:{ //发送消息的数据格式
+        Sender:{
+          name:"",
+          IP:"",
+        },
+        receiver:{
+          name:"",
+          IP:"",
+        },
+        content:"", //发送内容
+        date:"", //发送时间
+        type:0, //指示传送的是文件还是消息
+      },
+      SendContentList:[]  //发送消息的缓存列表
 		}
   },
   mounted(){
@@ -267,11 +281,13 @@ export default{
       this.memberName = item.user.name;
       this.isDownShow = false;
 		},
-		UnitSendMsg(){	//在联系人详情页按下发送消息键
+    UnitSendMsg(){	//在联系人详情页按下发送消息键
+    var that = this;
 			this.IsShowUserInfo = false;
       this.IsSendShow = true;
       this.membersWrapBoxIsShow = false;
       this.isDownShow = true;
+      this.$socket.emit("TCPServerBuild", { name:that.memberName }); //登陆触发服务端的函数,建立TCP连接
     },
     
   },
