@@ -137,7 +137,7 @@
                     </div>
                     <div class="member">
                       <img src="../../assets/iron.jpg" class="memberImg">
-                      <p class="memberName">{{memberName}}</p>
+                      <p class="memberName">{{menberInfo.memberName}}</p>
                     </div>
                   </div>
                 </div>
@@ -145,7 +145,7 @@
             </div>
             <div class="call" v-show="isDownShow">
               <div class="titleWrap">
-                <a href="#" class="titleName">{{memberName}}</a>
+                <a href="#" class="titleName">{{menberInfo.memberName}}</a>
                 <i class="down" style="width:10px;height:10px;" @click="membersWrapBoxIsShow = !membersWrapBoxIsShow"></i>
               </div>
             </div>
@@ -205,12 +205,12 @@
               <a href="#" title="图片和文件" class="photo"></a>
             </div>
             <div class="contentBox">
-              <textarea class="content"></textarea>
+              <textarea class="content" v-model="NowSendContent"></textarea>
               <span class="caretPosHelper"></span>
             </div>
             <div class="action">
               <span class="enter">按下Ctrl+Enter换行</span>
-              <a href="#" class="key">发送</a>
+              <a href="#" class="key" @click="SendMsg()">发送</a>
             </div>
           </div>
         </div>
@@ -268,7 +268,9 @@ export default{
         date:"", //发送时间
         type:0, //指示传送的是文件还是消息
       },
-      SendContentList:[]  //发送消息的缓存列表
+      SendContentList:[],  //发送消息的缓存列表
+      NowSendContent:"", //现在发送的消息(输入框里面的)
+      SendBuffer:[] //发送消息的输入框缓存
 		}
   },
   mounted(){
@@ -290,9 +292,14 @@ export default{
       this.IsSendShow = true;
       this.membersWrapBoxIsShow = false;
       this.isDownShow = true;
-      this.$socket.emit("TCPClientConnectServer", { Sender:{name:"",IP:"",},receiver:{name:that.memberName,IP:,}, }); //登陆触发服务端的函数,建立TCP连接
+      this.$socket.emit("TCPClientConnectServer", {Sender:{name:that.MyInfo.username,IP:that.MyInfo.IP,},receiver:{name:that.menberInfo.memberName,IP:that.menberInfo.IP,},}); //登陆触发服务端的函数,建立TCP连接
     },
-    
+    SendMsg(){
+      var that = this;
+      console.log(33)
+     this.$socket.emit("TCPClientSendSever",{Sender:{name:that.MyInfo.username,IP:that.MyInfo.IP,},receiver:{name:that.menberInfo.memberName,IP:that.menberInfo.IP,},content:that.NowSendContent,date:"",});
+      this.NowSendContent = ""; //清空输入框
+    }
   },
     sockets: {      //服务端触发客户端这边的事件
     ClientLogin(value) {
@@ -309,9 +316,8 @@ export default{
           img:require("../../assets/otherhead.jpg")
         }
       };
-      console.log(that.usersList);
-      if(that.usersList == []){
-        console.log(1);
+      console.log(that.usersList,that.MyInfo.IP);
+      if(value.User.IP == that.MyInfo.IP){
         isChange = true;
       }
       this.usersList.map(function(value, index, array) {
@@ -326,7 +332,8 @@ export default{
           that.usersList.push(item); //在用户列表中加入这个人
       }
     },
-    GetMsg(){ //从node服务端传回来的TCP信息
+    GetMsg(value){ //从node服务端传回来的TCP信息
+      this.SendContentList.push(data);  //将返回信息保存
 
     }
   },
