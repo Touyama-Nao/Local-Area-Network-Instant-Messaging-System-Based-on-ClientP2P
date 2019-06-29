@@ -251,7 +251,9 @@ export default{
 			IsShowUserInfo: true, //确保用户信息页是否显示
 			IsSendShow: false,
       membersWrapBoxIsShow: false,
-      memberName:"xiao",
+      menberInfo:{
+        memberName:"xiao",
+        IP:""},
       isDownShow: false,  //聊天框上面的人名
       SendContent:{ //发送消息的数据格式
         Sender:{
@@ -278,7 +280,8 @@ export default{
 			this.IsSendShow = false;
 			this.IsShowUserInfo = true;
       this.currentUserId = item.id;
-      this.memberName = item.user.name;
+      this.menberInfo.memberName = item.user.name;
+      this.menberInfo.IP = item.user.IPAddress;
       this.isDownShow = false;
 		},
     UnitSendMsg(){	//在联系人详情页按下发送消息键
@@ -287,7 +290,7 @@ export default{
       this.IsSendShow = true;
       this.membersWrapBoxIsShow = false;
       this.isDownShow = true;
-      this.$socket.emit("TCPServerBuild", { name:that.memberName }); //登陆触发服务端的函数,建立TCP连接
+      this.$socket.emit("TCPClientConnectServer", { Sender:{name:"",IP:"",},receiver:{name:that.memberName,IP:,}, }); //登陆触发服务端的函数,建立TCP连接
     },
     
   },
@@ -322,6 +325,9 @@ export default{
           //如果遍历列表之后发现没有这个人的话
           that.usersList.push(item); //在用户列表中加入这个人
       }
+    },
+    GetMsg(){ //从node服务端传回来的TCP信息
+
     }
   },
 }
