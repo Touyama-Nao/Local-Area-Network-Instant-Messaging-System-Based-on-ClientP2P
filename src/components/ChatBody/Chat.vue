@@ -22,7 +22,7 @@
                   <i class="view"></i>意见反馈
                 </a>
               </li>
-              <li>
+              <li @click="Logout()">
                 <a href="#" title="退出" class="dropCell" id="out">
                   <i class="out"></i>退出
                 </a>
@@ -105,10 +105,22 @@
                 <div class="nav">
                   <div class="peopleStar"></div>
                   <div class="peopleEnd">
-                    <div class="friendsBox" :key="index" v-for="(item,index) in SendContentNumList" v-show="SwitchChooseNum == 1">
-                      <div class="chatItem" :class="{ active: item.id === currentUserId }" @click="GetNewMsg(item,index)">
+                    <div
+                      class="friendsBox"
+                      :key="index"
+                      v-for="(item,index) in SendContentNumList"
+                      v-show="SwitchChooseNum == 1"
+                    >
+                      <div
+                        class="chatItem"
+                        :class="{ active: item.id === currentUserId }"
+                        @click="GetNewMsg(item,index)"
+                      >
                         <div class="ext">
-                          <p class="attr"><i class="unread" v-if="item.Num != 0">{{item.Num}}</i></p>  <!-- 红点数目 -->
+                          <p class="attr">
+                            <i class="unread" v-if="item.Num != 0">{{item.Num}}</i>
+                          </p>
+                          <!-- 红点数目 -->
                         </div>
                         <div class="avatar">
                           <img :src="item.img" :alt="item.name" />
@@ -309,7 +321,7 @@ export default {
       menberInfo: {
         memberName: "xiao",
         IP: "",
-        port:"" //端口号
+        port: "" //端口号
       },
       isDownShow: false, //聊天框上面的人名
       SendContent: {
@@ -348,9 +360,9 @@ export default {
     UnitSendMsg(index) {
       //在联系人详情页按下发送消息键
       var that = this;
-      for(let index =0;index < that.SendContentNumList.length;index++){
-        if(that.SendContentNumList[index].IP == that.menberInfo.IP){
-          that.SendContentNumList[index].Num == 0;  //获取消息之后红点数量变成零!
+      for (let index = 0; index < that.SendContentNumList.length; index++) {
+        if (that.SendContentNumList[index].IP == that.menberInfo.IP) {
+          that.SendContentNumList[index].Num == 0; //获取消息之后红点数量变成零!
         }
       }
       this.IsShowUserInfo = false;
@@ -371,21 +383,49 @@ export default {
         date: ""
       });
       this.SendContentList.push({
-        Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP ,port:that.MyInfo.port},
+        Sender: {
+          name: that.MyInfo.username,
+          IP: that.MyInfo.IP,
+          port: that.MyInfo.port
+        },
         receiver: { name: that.menberInfo.memberName, IP: that.menberInfo.IP },
         content: that.NowSendContent,
         date: ""
       });
       this.NowSendContent = ""; //清空输入框
     },
-    GetNewMsg(item,index){  //获取对应人的最新消息
+    GetNewMsg(item, index) {
+      //获取对应人的最新消息
       var that = this;
-      that.SendContentNumList[index].Num == 0;  //获取消息之后红点数量变成零!
+      that.SendContentNumList[index].Num == 0; //获取消息之后红点数量变成零!
       this.IsShowUserInfo = false;
       this.IsSendShow = true;
       this.membersWrapBoxIsShow = false;
       this.isDownShow = true;
-      this.currentUserId = item.IP;
+      that.currentUserId = item.IP;
+    },
+    Logout() {
+      var that = this;
+      this.$confirm("此操作将退出聊天, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$message({
+            type: "success",
+            message: "登出成功!"
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消下线"
+          });
+        });
+      this.$socket.emit('ServerLogout',{
+
+      })
     }
   },
   sockets: {
@@ -422,33 +462,39 @@ export default {
         //如果遍历列表之后发现没有这个人的话
         that.usersList.push(item); //在用户列表中加入这个人
       }
+      this.$notify.info({
+        title: "上线提醒",
+        message: value.User.name + "上线了!"
+      });
     },
     GetMsg(value) {
       console.log(value);
-      this.$notify({  //显示通知!
-          title: value.Sender.name + "发来消息",
-          message: value.content,
-          duration: 0
+      this.$notify.info({
+        //显示通知!
+        title: value.Sender.name + "发来消息",
+        message: value.content,
+        duration: 0
       });
       var isSame = false;
-      for(let i = 0;i < SendContentNumList.length;i++){
-        if(SendContentNumList[i].IP == value.Sender.IP){
+      for (let i = 0; i < SendContentNumList.length; i++) {
+        if (SendContentNumList[i].IP == value.Sender.IP) {
           isSame = true;
         }
         SendContentNumList[i].Num++; //红点数量加一
       }
-      if(this.SendContentNumList.length == 0){
+      if (this.SendContentNumList.length == 0) {
         isSame = false;
       }
-      var item = {  //SendContentNumList的数据格式
-        name:"",
-        IP:"",
-        port:"",
-        Num:0,  //红点数量
-        content:"", //发消息来的最新内容
-        img:require("../../assets/otherhead.jpg"),  //头像
-      } 
-      if(isSame == false){
+      var item = {
+        //SendContentNumList的数据格式
+        name: "",
+        IP: "",
+        port: "",
+        Num: 0, //红点数量
+        content: "", //发消息来的最新内容
+        img: require("../../assets/otherhead.jpg") //头像
+      };
+      if (isSame == false) {
         item.name = value.Sender.name;
         item.IP = value.Sender.IP;
         item.port = value.Sender.port;
@@ -459,6 +505,20 @@ export default {
       this.SendContentList.push(value); //将返回信息保存
       console.log(this.SendContentList);
       console.log(this.SendContentNumList);
+    },
+    CilentLogout(value) {
+      var that = this;
+      //用户下线!
+      this.$notify({
+        title: "下线提醒",
+        message: value.User.name + "下线了!朋友我们有缘再见!",
+        type: "warning"
+      });
+      for(let i = 0;i<usersList.length;i++){  //用户列表去掉这个人!
+        if(that.usersList[i].user.IP == value.User.IP){
+          this.usersList.splice(index,1); //用户列表去掉这个人!
+        }
+      };
     }
   }
 };
@@ -1332,8 +1392,8 @@ button {
   margin: 0 auto;
   text-align: center;
   font-size: 12px;
-/*   color: #b2b2b2; */
-  color:#000;
+  /*   color: #b2b2b2; */
+  color: #000;
   line-height: 120%;
 }
 .messageStar {
@@ -1373,7 +1433,6 @@ button {
   cursor: pointer;
 }
 .subject {
-  
   overflow: hidden;
 }
 .me {
