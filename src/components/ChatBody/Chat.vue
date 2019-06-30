@@ -78,12 +78,8 @@
         							<p class="name">{{item.user.name}}</p>
       							</li>
                     </ul>-->
-                    <div class="peopleBox" v-for="item in usersList" v-show="SwitchChooseNum == 3">
-                      <div
-                        class="peopleMain"
-                        :class="{ active: item.id == currentUserId }"
-                        @click="ClickPeopleInfo(item)"
-                      >
+                    <div class="peopleBox" :key="index" v-for="(item,index) in usersList" v-show="SwitchChooseNum == 3">
+                      <div class="peopleMain" :class="{ active: item.id == currentUserId }" @click="ClickPeopleInfo(item)">
                         <div class="people">
                           <div class="peopleImg">
                             <img :src="item.user.img" :alt="item.user.name" />
@@ -99,7 +95,7 @@
               </div>
             </div>
           </div>
-          <div class="navListBox">
+          <div class="navListBox" v-show="SwitchChooseNum == 1">
             <div class="navListMain">
               <div class="navList">
                 <div class="nav">
@@ -355,9 +351,10 @@ export default {
       this.IsShowUserInfo = true;
       this.currentUserId = item.id;
       this.menberInfo.memberName = item.user.name;
-      this.menberInfo.IP = item.user.IPAddress;
-      this.menberInfo.port = item.user.port;
+      this.menberInfo.IP = item.IPAddress;
+      this.menberInfo.port = item.port;
       this.isDownShow = false;
+      console.log(this.menberInfo);
     },
     UnitSendMsg(index) {
       //在联系人详情页按下发送消息键
@@ -377,7 +374,9 @@ export default {
       }); //登陆触发服务端的函数,建立TCP连接
     },
     SendMsg() {
+
       var that = this;
+            console.log(that.menberInfo);
       this.$socket.emit("TCPClientSendSever", {
         Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP ,port:that.MyInfo.port},
         receiver: { name: that.menberInfo.memberName, IP: that.menberInfo.IP,port:that.menberInfo.port },
@@ -397,6 +396,7 @@ export default {
       this.NowSendContent = ""; //清空输入框
     },
     GetNewMsg(item, index) {
+      console.log(2);
       //获取对应人的最新消息
       var that = this;
       that.SendContentNumList[index].Num = 0; //获取消息之后红点数量变成零!
@@ -433,7 +433,6 @@ export default {
     //服务端触发客户端这边的事件
     ClientLogin(value) {
       var that = this;
-      console.log(value);
       var username = value.User.name; //根据格式获得名字
       var IP = value.User.IP;
       var isChange = false;
@@ -447,21 +446,19 @@ export default {
           img: require("../../assets/otherhead.jpg")
         }
       };
-      console.log(value.User.port, that.MyInfo.port);
       if (
         value.User.IP == that.MyInfo.IP &&
         value.User.port == that.MyInfo.port
       ) {
         isChange = true;
       }
-      this.usersList.map(function(value, index, array) {
-        console.log(value);
-        if (value.IPAddress == IP || IP == that.MyInfo.IP) {
+      this.usersList.map(function(date, index, array) {
+        if (date.IPAddress == IP || IP == that.MyInfo.IP) {
           //通过IP判断这个人是否重复
           isChange = true;
+          that.usersList[index].user.name = value.User.name;  //重新登陆切换名字!
         }
       });
-      console.log(that.usersList);
       if (isChange == false) {
         //如果遍历列表之后发现没有这个人的话
         that.usersList.push(item); //在用户列表中加入这个人
@@ -470,9 +467,9 @@ export default {
         title: "上线提醒",
         message: value.User.name + "上线了!"
       });
+      console.log(that.usersList);
     },
     GetMsg(value) {
-      console.log(value);
       var that = this;
       var isSame = false;
       for (let i = 0; i < that.SendContentNumList.length; i++) {
@@ -506,8 +503,6 @@ export default {
       }
       //从node服务端传回来的TCP信息
       this.SendContentList.push(value); //将返回信息保存
-      console.log(this.SendContentList);
-      console.log(this.SendContentNumList);
       this.$notify.info({
         //显示通知!
         title: item.name + "发来消息",
