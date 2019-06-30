@@ -42,7 +42,7 @@
         class="logIn-input"
         id="username"
         v-model="LoginForm.name"
-      >
+      />
       <input
         type="text"
         name="ip"
@@ -50,16 +50,16 @@
         class="logIn-input"
         id="ip_input"
         v-model="Ipaddress"
-      >
+      />
       <div class="remember">
-        <input type="checkbox" name="checkbox" id="remember"> Remember Me
+        <input type="checkbox" name="checkbox" id="remember" /> Remember Me
       </div>
       <div class="register-text">
         <span class="text-button">Register</span>
         <span>|</span>
         <span class="text-button">Forgot Password?</span>
       </div>
-      <input type="submit" placeholder="Sign In" id="logIn-submit" @click="onLoginSubmit">
+      <input type="submit" placeholder="Sign In" id="logIn-submit" @click="onLoginSubmit" />
     </div>
     <span class="middle"></span>
     <canvas id="canvas">您的浏览器不支持，请升级最新的版本!</canvas>
@@ -100,7 +100,7 @@ export default {
         array: [] //保存n个圆形粒子对象
       },
       Ipaddress: "",
-      port:""
+      port: ""
     };
   },
   sockets: {
@@ -114,21 +114,27 @@ export default {
   methods: {
     onLoginSubmit() {
       //this.isShowLogin = false;
-/*       console.log(returnCitySN["cip"]); */
-      this.$router.push({
-      　　　　path: '/Chat', query:{username:this.LoginForm.name,IP:this.Ipaddress,port:this.port}
-       　　 });
+      /*       console.log(returnCitySN["cip"]); */
       this.$socket.emit("ServerLogin", { username: this.LoginForm.name }); //登陆触发服务端的函数
+      this.$router.push({
+        path: "/Chat",
+        query: {
+          username: this.LoginForm.name,
+          IP: this.Ipaddress,
+          port: this.port
+        }
+      });
       this.$message({
-        message: '恭喜你，登陆成功!',
-        type: 'success'
+        message: "恭喜你，登陆成功!",
+        type: "success"
       });
     },
     resetForm(formName) {
       //重置登陆
       this.$refs[formName].resetFields();
     },
-    getUserIP(onNewIP) {  //弃用，这是另一个IP地址
+    getUserIP(onNewIP) {
+      //弃用，这是另一个IP地址
       //获取当前局域网的ip地址
       let MyPeerConnection =
         window.RTCPeerConnection ||
@@ -167,8 +173,7 @@ export default {
     }
   },
   mounted() {
-
- /*    var that = this;
+    /*    var that = this;
     window.requestAnimFrame = (function() {
       return (
         window.requestAnimationFrame ||
@@ -317,7 +322,6 @@ export default {
       requestAnimFrame(animateDots);
     }
     animateDots(); */
-
     /*     can.onmousemove = function(ev) {
       var ev = ev || window.event;
       mousePosition.x = ev.pageX;

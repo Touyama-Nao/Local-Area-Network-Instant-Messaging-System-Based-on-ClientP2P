@@ -209,7 +209,7 @@
               <div class="irc">
                 <div class="chatMessageBox" v-show="isDownShow == true">
                   <div class="messageStar" :key="index" v-for="(item,index) in SendContentList">
-                    <div class="speak" v-if="item.Sender.IP == menberInfo.IP">
+                    <div class="speak" v-if="item.Sender.IP == menberInfo.IP && item.Sender.port == menberInfo.port">
                       <div class="clearfix">
                         <div class="subjectBox">
                           <div class="subjectMain-1">
@@ -230,7 +230,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="speak" v-if="item.Sender.IP == MyInfo.IP">
+                    <div class="speak" v-if="item.Sender.IP == MyInfo.IP && item.Sender.port == MyInfo.port">
                       <div class="clearfix">
                         <div class="subjectBox">
                           <div class="subjectMain-2">
@@ -356,6 +356,7 @@ export default {
       this.currentUserId = item.id;
       this.menberInfo.memberName = item.user.name;
       this.menberInfo.IP = item.user.IPAddress;
+      this.menberInfo.port = item.user.port;
       this.isDownShow = false;
     },
     UnitSendMsg(index) {
@@ -363,7 +364,7 @@ export default {
       var that = this;
       for (let index = 0; index < that.SendContentNumList.length; index++) {
         if (that.SendContentNumList[index].IP == that.menberInfo.IP) {
-          that.SendContentNumList[index].Num == 0; //获取消息之后红点数量变成零!
+          that.SendContentNumList[index].Num = 0; //获取消息之后红点数量变成零!
         }
       }
       this.IsShowUserInfo = false;
@@ -371,15 +372,15 @@ export default {
       this.membersWrapBoxIsShow = false;
       this.isDownShow = true;
       this.$socket.emit("TCPClientConnectServer", {
-        Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP },
-        receiver: { name: that.menberInfo.memberName, IP: that.menberInfo.IP }
+        Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP,port:that.MyInfo.port },
+        receiver: { name: that.menberInfo.memberName, IP: that.menberInfo.IP,port:that.menberInfo.port  }
       }); //登陆触发服务端的函数,建立TCP连接
     },
     SendMsg() {
       var that = this;
       this.$socket.emit("TCPClientSendSever", {
-        Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP },
-        receiver: { name: that.menberInfo.memberName, IP: that.menberInfo.IP },
+        Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP ,port:that.MyInfo.port},
+        receiver: { name: that.menberInfo.memberName, IP: that.menberInfo.IP,port:that.menberInfo.port },
         content: that.NowSendContent,
         date: ""
       });
@@ -398,12 +399,15 @@ export default {
     GetNewMsg(item, index) {
       //获取对应人的最新消息
       var that = this;
-      that.SendContentNumList[index].Num == 0; //获取消息之后红点数量变成零!
+      that.SendContentNumList[index].Num = 0; //获取消息之后红点数量变成零!
       this.IsShowUserInfo = false;
       this.IsSendShow = true;
       this.membersWrapBoxIsShow = false;
       this.isDownShow = true;
       that.currentUserId = item.IP;
+      this.menberInfo.memberName = that.SendContentNumList[index].name;
+      this.menberInfo.IP = that.SendContentNumList[index].IP;
+      this.menberInfo.port = that.SendContentNumList[index].port;
     },
     Logout() {
       var that = this;
@@ -422,6 +426,7 @@ export default {
 
         }
       });
+      this.IsDropDwon = false; //关掉下拉框
     }
   },
   sockets: {
