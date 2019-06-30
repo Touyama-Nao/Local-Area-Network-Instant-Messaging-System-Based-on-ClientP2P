@@ -79,7 +79,7 @@
       							</li>
                     </ul>-->
                     <div class="peopleBox" :key="index" v-for="(item,index) in usersList" v-show="SwitchChooseNum == 3">
-                      <div class="peopleMain" :class="{ active: item.id == currentUserId }" @click="ClickPeopleInfo(item)">
+                      <div class="peopleMain" :class="{ active: item.id == currentUserId }" @click="ClickPeopleInfo(item,index)">
                         <div class="people">
                           <div class="peopleImg">
                             <img :src="item.user.img" :alt="item.user.name" />
@@ -205,7 +205,7 @@
               <div class="irc">
                 <div class="chatMessageBox" v-show="isDownShow == true">
                   <div class="messageStar" :key="index" v-for="(item,index) in SendContentList">
-                    <div class="speak" v-if="item.Sender.IP == menberInfo.IP && item.Sender.port == menberInfo.port">
+                    <div class="speak" v-if="item.Sender.IP == menberInfo.IP && item.Sender.port == menberInfo.TCPport">
                       <div class="clearfix">
                         <div class="subjectBox">
                           <div class="subjectMain-1">
@@ -262,7 +262,8 @@
               <div class="toolbar">
                 <a href="#" title="表情" class="look"></a>
                 <a href="#" title="截屏" class="screen"></a>
-                <a href="#" title="图片和文件" class="photo"></a>
+                <a href="#" title="图片和文件" class="photo" @click="UpLoadFileorPhoto()"></a>
+                <input type="file" ref="fileupLoad" id="file" onchange="getFilePath()" style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;"/>
               </div>
               <div class="contentBox">
                 <textarea class="content" v-model="NowSendContent"></textarea>
@@ -317,7 +318,8 @@ export default {
       menberInfo: {
         memberName: "xiao",
         IP: "",
-        port: "" //端口号
+        port: "", //端口号
+        TCPport:""
       },
       isDownShow: false, //聊天框上面的人名
       SendContent: {
@@ -346,7 +348,7 @@ export default {
     this.MyInfo.port = this.$route.query.port;
   },
   methods: {
-    ClickPeopleInfo(item) {
+    ClickPeopleInfo(item,index) {
       this.IsSendShow = false;
       this.IsShowUserInfo = true;
       this.currentUserId = item.id;
@@ -355,6 +357,7 @@ export default {
       this.menberInfo.port = item.port;
       this.isDownShow = false;
       console.log(this.menberInfo);
+      console.log(this.SendContentList);
     },
     UnitSendMsg(index) {
       //在联系人详情页按下发送消息键
@@ -408,6 +411,7 @@ export default {
       this.menberInfo.memberName = that.SendContentNumList[index].name;
       this.menberInfo.IP = that.SendContentNumList[index].IP;
       this.menberInfo.port = that.SendContentNumList[index].port;
+      this.menberInfo.TCPport =that.SendContentNumList[index].port;
     },
     Logout() {
       var that = this;
@@ -427,6 +431,9 @@ export default {
         }
       });
       this.IsDropDwon = false; //关掉下拉框
+    },
+    UpLoadFileorPhoto(){
+      this.$refs.fileupLoad.click();
     }
   },
   sockets: {
