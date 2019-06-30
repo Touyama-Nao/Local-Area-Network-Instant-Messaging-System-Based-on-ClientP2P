@@ -117,6 +117,10 @@ export default {
       　　　　path: '/Chat', query:{username:this.LoginForm.name,IP:this.Ipaddress}
        　　 });
       this.$socket.emit("ServerLogin", { username: this.LoginForm.name }); //登陆触发服务端的函数
+      this.$message({
+        message: '恭喜你，登陆成功!',
+        type: 'success'
+      });
     },
     resetForm(formName) {
       //重置登陆

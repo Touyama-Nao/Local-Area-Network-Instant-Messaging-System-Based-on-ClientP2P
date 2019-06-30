@@ -105,10 +105,10 @@
                 <div class="nav">
                   <div class="peopleStar"></div>
                   <div class="peopleEnd">
-                    <div class="friendsBox" v-for="item in SendContentNumList" v-show="SwitchChooseNum == 1">
-                      <div class="chatItem" :class="{ active: item.id === currentUserId }">
+                    <div class="friendsBox" :key="index" v-for="(item,index) in SendContentNumList" v-show="SwitchChooseNum == 1">
+                      <div class="chatItem" :class="{ active: item.id === currentUserId }" @click="GetNewMsg(item,index)">
                         <div class="ext">
-                          <p class="attr"></p>
+                          <p class="attr"><i class="unread" v-if="item.Num != 0">{{item.Num}}</i></p>  <!-- 红点数目 -->
                         </div>
                         <div class="avatar">
                           <img :src="item.img" :alt="item.name" />
@@ -118,7 +118,7 @@
                             <span class="chatNicktext" :alt="item.name">{{item.name}}</span>
                           </h3>
                           <p class="chatContent">
-                            <span class="chatContenttext"></span>
+                            <span class="chatContenttext">{{item.content}}</span>
                           </p>
                         </div>
                       </div>
@@ -308,7 +308,8 @@ export default {
       membersWrapBoxIsShow: false,
       menberInfo: {
         memberName: "xiao",
-        IP: ""
+        IP: "",
+        port:"" //端口号
       },
       isDownShow: false, //聊天框上面的人名
       SendContent: {
@@ -344,9 +345,14 @@ export default {
       this.menberInfo.IP = item.user.IPAddress;
       this.isDownShow = false;
     },
-    UnitSendMsg() {
+    UnitSendMsg(index) {
       //在联系人详情页按下发送消息键
       var that = this;
+      for(let index =0;index < that.SendContentNumList.length;index++){
+        if(that.SendContentNumList[index].IP == that.menberInfo.IP){
+          that.SendContentNumList[index].Num == 0;  //获取消息之后红点数量变成零!
+        }
+      }
       this.IsShowUserInfo = false;
       this.IsSendShow = true;
       this.membersWrapBoxIsShow = false;
@@ -365,12 +371,21 @@ export default {
         date: ""
       });
       this.SendContentList.push({
-        Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP },
+        Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP ,port:that.MyInfo.port},
         receiver: { name: that.menberInfo.memberName, IP: that.menberInfo.IP },
         content: that.NowSendContent,
         date: ""
       });
       this.NowSendContent = ""; //清空输入框
+    },
+    GetNewMsg(item,index){  //获取对应人的最新消息
+      var that = this;
+      that.SendContentNumList[index].Num == 0;  //获取消息之后红点数量变成零!
+      this.IsShowUserInfo = false;
+      this.IsSendShow = true;
+      this.membersWrapBoxIsShow = false;
+      this.isDownShow = true;
+      this.currentUserId = item.IP;
     }
   },
   sockets: {
@@ -410,6 +425,11 @@ export default {
     },
     GetMsg(value) {
       console.log(value);
+      this.$notify({  //显示通知!
+          title: value.Sender.name + "发来消息",
+          message: value.content,
+          duration: 0
+      });
       var isSame = false;
       for(let i = 0;i < SendContentNumList.length;i++){
         if(SendContentNumList[i].IP == value.Sender.IP){
@@ -425,17 +445,20 @@ export default {
         IP:"",
         port:"",
         Num:0,  //红点数量
+        content:"", //发消息来的最新内容
         img:require("../../assets/otherhead.jpg"),  //头像
       } 
       if(isSame == false){
         item.name = value.Sender.name;
         item.IP = value.Sender.IP;
         item.port = value.Sender.port;
+        item.content = value.content;
+        this.SendContentNumList.push(item);
       }
-      this.SendContentNumList.push(item);
       //从node服务端传回来的TCP信息
       this.SendContentList.push(value); //将返回信息保存
       console.log(this.SendContentList);
+      console.log(this.SendContentNumList);
     }
   }
 };
