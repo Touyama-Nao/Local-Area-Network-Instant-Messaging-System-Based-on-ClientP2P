@@ -117,8 +117,7 @@
                         @click="GetNewMsg(item,index)"
                       >
                         <div class="ext">
-                          <p class="attr">
-                          </p>
+                          <p class="attr"></p>
                           <!-- 红点数目 -->
                         </div>
                         <div class="avatar">
@@ -408,27 +407,20 @@ export default {
     },
     Logout() {
       var that = this;
-      this.$confirm("此操作将退出聊天, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      })
-        .then(() => {
-          that.$message({
-            type: "success",
-            message: "登出成功!"
-          });
-        })
-        .catch(() => {
-          that.$message({
-            type: "info",
-            message: "已取消下线"
-          });
-        });
       this.$socket.emit("ServerLogout", {
         username: that.MyInfo.username,
         IP: that.MyInfo.IP,
         port: that.MyInfo.port
+      });
+      that.$message({
+        type: "success",
+        message: "登出成功!"
+      });
+      this.$router.push({
+        path: "/",
+        query: {
+
+        }
       });
     }
   },
