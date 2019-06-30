@@ -99,14 +99,16 @@ export default {
         d_radius: 100, //粒子距离鼠标点的距离
         array: [] //保存n个圆形粒子对象
       },
-      Ipaddress: ""
+      Ipaddress: "",
+      port:""
     };
   },
   sockets: {
     getIPAdress(data) {
+      console.log(data);
       //将获取到的IP地址填入input中
-      console.log()
       this.Ipaddress = data.User.IP;
+      this.port = data.User.port;
     }
   },
   methods: {
@@ -114,7 +116,7 @@ export default {
       //this.isShowLogin = false;
 /*       console.log(returnCitySN["cip"]); */
       this.$router.push({
-      　　　　path: '/Chat', query:{username:this.LoginForm.name,IP:this.Ipaddress}
+      　　　　path: '/Chat', query:{username:this.LoginForm.name,IP:this.Ipaddress,port:this.port}
        　　 });
       this.$socket.emit("ServerLogin", { username: this.LoginForm.name }); //登陆触发服务端的函数
       this.$message({

@@ -118,12 +118,12 @@
                       >
                         <div class="ext">
                           <p class="attr">
-                            <i class="unread" v-if="item.Num != 0">{{item.Num}}</i>
                           </p>
                           <!-- 红点数目 -->
                         </div>
                         <div class="avatar">
                           <img :src="item.img" :alt="item.name" />
+                          <i class="unread" v-if="item.Num != 0">{{item.Num}}</i>
                         </div>
                         <div class="text">
                           <h3 class="chatNick">
@@ -301,7 +301,8 @@ export default {
       MyInfo: {
         //用于存放本人信息
         username: "",
-        IP: ""
+        IP: "",
+        port: ""
       },
       usersList: [
         //存放用户列表
@@ -347,6 +348,7 @@ export default {
   mounted() {
     this.MyInfo.username = this.$route.query.username;
     this.MyInfo.IP = this.$route.query.IP;
+    this.MyInfo.port = this.$route.query.port;
   },
   methods: {
     ClickPeopleInfo(item) {
@@ -412,20 +414,22 @@ export default {
         type: "warning"
       })
         .then(() => {
-          this.$message({
+          that.$message({
             type: "success",
             message: "登出成功!"
           });
         })
         .catch(() => {
-          this.$message({
+          that.$message({
             type: "info",
             message: "已取消下线"
           });
         });
-      this.$socket.emit('ServerLogout',{
-
-      })
+      this.$socket.emit("ServerLogout", {
+        username: that.MyInfo.username,
+        IP: that.MyInfo.IP,
+        port: that.MyInfo.port
+      });
     }
   },
   sockets: {
@@ -446,8 +450,11 @@ export default {
           img: require("../../assets/otherhead.jpg")
         }
       };
-      console.log(that.usersList, that.MyInfo.IP);
-      if (value.User.IP == that.MyInfo.IP) {
+      console.log(value.User.port, that.MyInfo.port);
+      if (
+        value.User.IP == that.MyInfo.IP &&
+        value.User.port == that.MyInfo.port
+      ) {
         isChange = true;
       }
       this.usersList.map(function(value, index, array) {
@@ -469,20 +476,15 @@ export default {
     },
     GetMsg(value) {
       console.log(value);
-      this.$notify.info({
-        //显示通知!
-        title: value.Sender.name + "发来消息",
-        message: value.content,
-        duration: 0
-      });
+      var that = this;
       var isSame = false;
-      for (let i = 0; i < SendContentNumList.length; i++) {
-        if (SendContentNumList[i].IP == value.Sender.IP) {
+      for (let i = 0; i < that.SendContentNumList.length; i++) {
+        if (that.SendContentNumList[i].IP == value.Sender.IP) {
           isSame = true;
         }
-        SendContentNumList[i].Num++; //红点数量加一
+        that.SendContentNumList[i].Num++; //红点数量加一
       }
-      if (this.SendContentNumList.length == 0) {
+      if (that.SendContentNumList.length == 0) {
         isSame = false;
       }
       var item = {
@@ -495,7 +497,11 @@ export default {
         img: require("../../assets/otherhead.jpg") //头像
       };
       if (isSame == false) {
-        item.name = value.Sender.name;
+        for (let i = 0; i < that.usersList.length; i++) {
+          if (that.usersList[i].IPAddress == value.Sender.IP) {
+            item.name = that.usersList[i].user.name;
+          }
+        }
         item.IP = value.Sender.IP;
         item.port = value.Sender.port;
         item.content = value.content;
@@ -505,6 +511,12 @@ export default {
       this.SendContentList.push(value); //将返回信息保存
       console.log(this.SendContentList);
       console.log(this.SendContentNumList);
+      this.$notify.info({
+        //显示通知!
+        title: item.name + "发来消息",
+        message: value.content,
+        duration: 0
+      });
     },
     CilentLogout(value) {
       var that = this;
@@ -514,11 +526,18 @@ export default {
         message: value.User.name + "下线了!朋友我们有缘再见!",
         type: "warning"
       });
-      for(let i = 0;i<usersList.length;i++){  //用户列表去掉这个人!
-        if(that.usersList[i].user.IP == value.User.IP){
-          this.usersList.splice(index,1); //用户列表去掉这个人!
+      for (let i = 0; i < that.usersList.length; i++) {
+        //用户列表去掉这个人!
+        if (that.usersList[i].user.IP == value.User.IP) {
+          that.usersList.splice(index, 1); //用户列表去掉这个人!
         }
-      };
+      }
+      for (let i = 0; i < that.SendContentNumList.length; i++) {
+        //用户列表去掉这个人!
+        if (that.SendContentNumList[i].user.IP == value.User.IP) {
+          that.SendContentNumList.splice(index, 1); //用户列表去掉这个人!
+        }
+      }
     }
   }
 };
@@ -1375,7 +1394,7 @@ button {
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
-  display: none;
+  /*   display: none; */
 }
 ::-webkit-scrollbar-thumb {
   border-radius: 3px;
@@ -1539,7 +1558,6 @@ button {
   word-wrap: normal;
 }
 .navListBox {
-  visibility: hidden;
   width: auto;
   top: 154px;
   position: absolute;
