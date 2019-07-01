@@ -115,19 +115,23 @@ export default {
     onLoginSubmit() {
       //this.isShowLogin = false;
       /*       console.log(returnCitySN["cip"]); */
-      this.$socket.emit("ServerLogin", { username: this.LoginForm.name }); //登陆触发服务端的函数
-      this.$router.push({
-        path: "/Chat",
-        query: {
-          username: this.LoginForm.name,
-          IP: this.Ipaddress,
-          port: this.port
-        }
-      });
-      this.$message({
-        message: "恭喜你，登陆成功!",
-        type: "success"
-      });
+      if (this.LoginForm.name.replace(/\s/g, "") == "") {
+        this.$message.error("个人姓名不能为空!");
+      } else if (this.LoginForm.name.replace(/\s/g, "") != "") {
+        this.$socket.emit("ServerLogin", { username: this.LoginForm.name }); //登陆触发服务端的函数
+        this.$router.push({
+          path: "/Chat",
+          query: {
+            username: this.LoginForm.name,
+            IP: this.Ipaddress,
+            port: this.port
+          }
+        });
+        this.$message({
+          message: "恭喜你，登陆成功!",
+          type: "success"
+        });
+      }
     },
     resetForm(formName) {
       //重置登陆
