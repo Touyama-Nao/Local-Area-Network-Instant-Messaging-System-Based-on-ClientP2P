@@ -205,7 +205,7 @@
               <div class="irc">
                 <div class="chatMessageBox" v-show="isDownShow == true">
                   <div class="messageStar" :key="index" v-for="(item,index) in SendContentList">
-                    <div class="speak" v-if="item.Sender.IP == menberInfo.IP && item.Sender.port == menberInfo.TCPport">
+                    <div class="speak" v-if="item.Sender.IP == menberInfo.IP && (item.Sender.port == menberInfo.port || menberInfo.port == 8083)">
                       <div class="clearfix">
                         <div class="subjectBox">
                           <div class="subjectMain-1">
