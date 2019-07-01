@@ -205,7 +205,7 @@
               <div class="irc">
                 <div class="chatMessageBox" v-show="isDownShow == true">
                   <div class="messageStar" :key="index" v-for="(item,index) in SendContentList">
-                    <div class="speak" v-if="item.Sender.IP == menberInfo.IP && (item.Sender.port == menberInfo.port || menberInfo.port == 8083)">
+                    <div class="speak" v-if="item.Sender.IP == menberInfo.IP && item.Sender.port == menberInfo.port">
                       <div class="clearfix">
                         <div class="subjectBox">
                           <div class="subjectMain-1">
@@ -354,7 +354,12 @@ export default {
       this.currentUserId = item.id;
       this.menberInfo.memberName = item.user.name;
       this.menberInfo.IP = item.IPAddress;
-      this.menberInfo.port = item.port;
+      for(let i = 0;i < this.SendContentList.length;i++){ //修改端口号
+        if(this.SendContentList[i].Sender.name != this.MyInfo.name){
+          this.menberInfo.port = parseInt(this.SendContentList[i].Sender.port);
+        }
+      }
+      
       this.isDownShow = false;
       console.log(this.menberInfo);
       console.log(this.SendContentList);
@@ -483,7 +488,8 @@ export default {
         if (that.SendContentNumList[i].IP == value.Sender.IP) {
           isSame = true;
         }
-        that.SendContentNumList[i].Num++; //红点数量加一
+        that.SendContentNumList[i].Num = that.SendContentNumList[i].Num + 1; //红点数量加一
+        that.SendContentNumList[i].content = value.content; //变更内容
       }
       if (that.SendContentNumList.length == 0) {
         isSame = false;
@@ -493,7 +499,7 @@ export default {
         name: "",
         IP: "",
         port: "",
-        Num: 0, //红点数量
+        Num: 1, //红点数量
         content: "", //发消息来的最新内容
         img: require("../../assets/otherhead.jpg") //头像
       };
@@ -512,7 +518,7 @@ export default {
       this.SendContentList.push(value); //将返回信息保存
       this.$notify.info({
         //显示通知!
-        title: item.name + "发来消息",
+        title: value.Sender.name + "发来消息",
         message: value.content,
         duration: 0
       });
@@ -527,14 +533,16 @@ export default {
       });
       for (let i = 0; i < that.usersList.length; i++) {
         //用户列表去掉这个人!
-        if (that.usersList[i].user.IP == value.User.IP) {
-          that.usersList.splice(index, 1); //用户列表去掉这个人!
+        console.log(value,that.usersList[i]);
+        if (that.usersList[i].IP == value.User.IPAddress && that.usersList[i].port == value.User.port) {
+          that.usersList.splice(i, 1); //用户列表去掉这个人!
         }
       }
       for (let i = 0; i < that.SendContentNumList.length; i++) {
         //用户列表去掉这个人!
-        if (that.SendContentNumList[i].user.IP == value.User.IP) {
-          that.SendContentNumList.splice(index, 1); //用户列表去掉这个人!
+        console.log(value,that.SendContentNumList[i]);
+        if (that.SendContentNumList[i].IP == value.User.IP && 8083 == value.User.port) {
+          that.SendContentNumList.splice(i, 1); //用户列表去掉这个人!
         }
       }
     }
