@@ -1,5 +1,7 @@
 <template>
   <div class="main">
+    <audio id="LoginMusic" src="../../../static/music/登陆音效.mp3">您的浏览器不支持 audio 标签。</audio>
+    <audio id="NoticeMusic" src="../../../static/music/信息提示音.mp3">您的浏览器不支持 audio 标签。</audio>
     <div class="mainPage">
       <div id="mainChat">
         <div id="friends">
@@ -189,19 +191,19 @@
                     <img src="../../assets/iron.jpg" />
                   </div>
                   <div class="unitNickBox">
-                    <h4 class="unitNick"></h4>
+                    <h4 class="unitNick">{{menberInfo.memberName}}</h4>
                   </div>
                   <p class="introduce"></p>
                   <div class="unitMetaBox">
                     <div class="unitMeta">
-                      <label class="label">地址：</label>
-                      <p class="address"></p>
+                      <label class="label">内网IP地址：</label>
+                      <p class="address">{{menberInfo.IP}}</p>
                     </div>
                   </div>
                   <div class="unitMetaBoxa">
                     <div class="unitMeta">
-                      <label class="label">邮箱：</label>
-                      <p class="mail"></p>
+                      <label class="label">内网TCP端口号：</label>
+                      <p class="mail">{{menberInfo.port}}</p>
                     </div>
                   </div>
                   <div class="unitMetaBoxb">
@@ -384,11 +386,18 @@ export default {
     };
   },
   mounted() {
+    const audio1 = document.getElementById("LoginMusic");
+    audio1.play();
     this.MyInfo.username = this.$route.query.username;
     this.MyInfo.IP = this.$route.query.IP;
     this.MyInfo.port = this.$route.query.port;
   },
   methods: {
+    // 语音播放
+    aplayAudio() {
+      const audio2 = document.getElementById("NoticeMusic");
+      audio2.play();
+    },
     ClickPeopleInfo(item, index) {
       this.IsSendShow = false;
       this.IsShowUserInfo = true;
@@ -406,8 +415,6 @@ export default {
       }
 
       this.isDownShow = false;
-      console.log(this.menberInfo);
-      console.log(this.SendContentList);
     },
     UnitSendMsg(index) {
       //在联系人详情页按下发送消息键
@@ -436,7 +443,6 @@ export default {
     },
     SendMsg() {
       var that = this;
-      console.log(that.menberInfo);
       this.$socket.emit("TCPClientSendSever", {
         Sender: {
           name: that.MyInfo.username,
@@ -562,7 +568,6 @@ export default {
         title: "上线提醒",
         message: value.User.name + "上线了!"
       });
-      console.log(that.usersList);
     },
     GetMsg(value) {
       var that = this;
@@ -613,7 +618,8 @@ export default {
         ) {
           this.menberInfo.port = parseInt(this.SendContentList[i].Sender.port);
         }
-      }
+      };
+      this.aplayAudio();
     },
     CilentLogout(value) {
       var that = this;
@@ -625,7 +631,6 @@ export default {
       });
       for (let i = 0; i < that.usersList.length; i++) {
         //用户列表去掉这个人!
-        console.log(value, that.usersList[i]);
         if (
           that.usersList[i].IP == value.User.IPAddress &&
           that.usersList[i].port == value.User.port
@@ -635,7 +640,6 @@ export default {
       }
       for (let i = 0; i < that.SendContentNumList.length; i++) {
         //用户列表去掉这个人!
-        console.log(value, that.SendContentNumList[i]);
         if (
           that.SendContentNumList[i].IP == value.User.IP &&
           8083 == value.User.port
