@@ -68,16 +68,20 @@
               <div class="friendsList">
                 <div class="include">
                   <div class="target">
-                    <!-- 									<ul>
-     								<li
-        						v-for="item in usersList"
-        						:class="{ active: item.id === currentUserId }"
-        						@click="selectSession(item.id)"
-      							>
-        							<img class="avatar" width="30" height="30" :alt="item.user.name" :src="item.user.img">
-        							<p class="name">{{item.user.name}}</p>
-      							</li>
-                    </ul>-->
+                    <div
+                      class="peopleBox"
+                      v-show="SwitchChooseNum == 3"
+                      style="background-color: #645d68 !important;"
+                    >
+                      <div class="peopleMain">
+                        <div class="people">
+                          <div class="peopleImg"></div>
+                          <div class="peopleNick">
+                            <h4 class="peoplename">当前在线用户</h4>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     <div
                       class="peopleBox"
                       :key="index"
@@ -650,11 +654,11 @@ export default {
     },
     RemindSendFileCompleted(data) {
       //提醒界面文件传输完成
-        this.$message({
-          message: '恭喜你，' + data.Filename + "文件发送成功!",
-          type: 'success'
-        });
-        this.loadingFile.close();
+      this.$message({
+        message: "恭喜你，" + data.Filename + "文件发送成功!",
+        type: "success"
+      });
+      this.loadingFile.close();
     }
   }
 };
