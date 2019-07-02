@@ -78,8 +78,17 @@
         							<p class="name">{{item.user.name}}</p>
       							</li>
                     </ul>-->
-                    <div class="peopleBox" :key="index" v-for="(item,index) in usersList" v-show="SwitchChooseNum == 3">
-                      <div class="peopleMain" :class="{ active: item.id == currentUserId }" @click="ClickPeopleInfo(item,index)">
+                    <div
+                      class="peopleBox"
+                      :key="index"
+                      v-for="(item,index) in usersList"
+                      v-show="SwitchChooseNum == 3"
+                    >
+                      <div
+                        class="peopleMain"
+                        :class="{ active: item.id == currentUserId }"
+                        @click="ClickPeopleInfo(item,index)"
+                      >
                         <div class="people">
                           <div class="peopleImg">
                             <img :src="item.user.img" :alt="item.user.name" />
@@ -205,7 +214,10 @@
               <div class="irc">
                 <div class="chatMessageBox" v-show="isDownShow == true">
                   <div class="messageStar" :key="index" v-for="(item,index) in SendContentList">
-                    <div class="speak" v-if="item.Sender.IP == menberInfo.IP && item.Sender.port == menberInfo.port">
+                    <div
+                      class="speak"
+                      v-if="item.Sender.IP == menberInfo.IP && item.Sender.port == menberInfo.port"
+                    >
                       <div class="clearfix">
                         <div class="subjectBox">
                           <div class="subjectMain-1">
@@ -226,7 +238,10 @@
                         </div>
                       </div>
                     </div>
-                    <div class="speak" v-if="item.Sender.IP == MyInfo.IP && item.Sender.port == MyInfo.port">
+                    <div
+                      class="speak"
+                      v-if="item.Sender.IP == MyInfo.IP && item.Sender.port == MyInfo.port"
+                    >
                       <div class="clearfix">
                         <div class="subjectBox">
                           <div class="subjectMain-2">
@@ -263,7 +278,17 @@
                 <a href="#" title="表情" class="look"></a>
                 <a href="#" title="截屏" class="screen"></a>
                 <a href="#" title="图片和文件" class="photo" @click="UpLoadFileorPhoto()"></a>
-                <input type="file" ref="fileupLoad" id="file" onchange="getFilePath()" style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;"/>
+                <el-dialog title="请手动填入文件路径" :visible.sync="dialogFormVisible">
+                  <el-form :model="form">
+                    <el-form-item label="文件路径">
+                      <el-input v-model="form.path" auto-complete="off"></el-input>
+                    </el-form-item>
+                  </el-form>
+                  <div slot="footer" class="dialog-footer">
+                    <el-button @click="dialogFormVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="tirggerFile()">确 定</el-button>
+                  </div>
+                </el-dialog>
               </div>
               <div class="contentBox">
                 <textarea class="content" v-model="NowSendContent"></textarea>
@@ -319,7 +344,7 @@ export default {
         memberName: "xiao",
         IP: "",
         port: "", //端口号
-        TCPport:""
+        TCPport: ""
       },
       isDownShow: false, //聊天框上面的人名
       SendContent: {
@@ -339,7 +364,19 @@ export default {
       SendContentList: [], //发送消息的缓存列表
       SendContentNumList: [], //统计发送消息的数量和人
       NowSendContent: "", //现在发送的消息(输入框里面的)
-      SendBuffer: [] //发送消息的输入框缓存
+      SendBuffer: [], //发送消息的输入框缓存
+      dialogFormVisible: false,
+      form: {
+        path: "", //文件路径
+        region: "",
+        date1: "",
+        date2: "",
+        delivery: false,
+        type: [],
+        resource: "",
+        desc: ""
+      },
+      loadingFile: ""
     };
   },
   mounted() {
@@ -348,18 +385,22 @@ export default {
     this.MyInfo.port = this.$route.query.port;
   },
   methods: {
-    ClickPeopleInfo(item,index) {
+    ClickPeopleInfo(item, index) {
       this.IsSendShow = false;
       this.IsShowUserInfo = true;
       this.currentUserId = item.id;
       this.menberInfo.memberName = item.user.name;
       this.menberInfo.IP = item.IPAddress;
-      for(let i = 0;i < this.SendContentList.length;i++){ //修改端口号
-        if(this.SendContentList[i].Sender.name != this.MyInfo.name){
+      for (let i = 0; i < this.SendContentList.length; i++) {
+        //修改端口号
+        if (
+          this.SendContentList[i].Sender.name != this.MyInfo.name &&
+          this.SendContentList[i].Sender.IP == this.MyInfo.IP
+        ) {
           this.menberInfo.port = parseInt(this.SendContentList[i].Sender.port);
         }
       }
-      
+
       this.isDownShow = false;
       console.log(this.menberInfo);
       console.log(this.SendContentList);
@@ -377,17 +418,32 @@ export default {
       this.membersWrapBoxIsShow = false;
       this.isDownShow = true;
       this.$socket.emit("TCPClientConnectServer", {
-        Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP,port:that.MyInfo.port },
-        receiver: { name: that.menberInfo.memberName, IP: that.menberInfo.IP,port:that.menberInfo.port  }
+        Sender: {
+          name: that.MyInfo.username,
+          IP: that.MyInfo.IP,
+          port: that.MyInfo.port
+        },
+        receiver: {
+          name: that.menberInfo.memberName,
+          IP: that.menberInfo.IP,
+          port: that.menberInfo.port
+        }
       }); //登陆触发服务端的函数,建立TCP连接
     },
     SendMsg() {
-
       var that = this;
-            console.log(that.menberInfo);
+      console.log(that.menberInfo);
       this.$socket.emit("TCPClientSendSever", {
-        Sender: { name: that.MyInfo.username, IP: that.MyInfo.IP ,port:that.MyInfo.port},
-        receiver: { name: that.menberInfo.memberName, IP: that.menberInfo.IP,port:that.menberInfo.port },
+        Sender: {
+          name: that.MyInfo.username,
+          IP: that.MyInfo.IP,
+          port: that.MyInfo.port
+        },
+        receiver: {
+          name: that.menberInfo.memberName,
+          IP: that.menberInfo.IP,
+          port: that.menberInfo.port
+        },
         content: that.NowSendContent,
         date: ""
       });
@@ -404,7 +460,6 @@ export default {
       this.NowSendContent = ""; //清空输入框
     },
     GetNewMsg(item, index) {
-      console.log(2);
       //获取对应人的最新消息
       var that = this;
       that.SendContentNumList[index].Num = 0; //获取消息之后红点数量变成零!
@@ -416,7 +471,7 @@ export default {
       this.menberInfo.memberName = that.SendContentNumList[index].name;
       this.menberInfo.IP = that.SendContentNumList[index].IP;
       this.menberInfo.port = that.SendContentNumList[index].port;
-      this.menberInfo.TCPport =that.SendContentNumList[index].port;
+      this.menberInfo.TCPport = that.SendContentNumList[index].port;
     },
     Logout() {
       var that = this;
@@ -431,14 +486,38 @@ export default {
       });
       this.$router.push({
         path: "/",
-        query: {
-
-        }
+        query: {}
       });
       this.IsDropDwon = false; //关掉下拉框
     },
-    UpLoadFileorPhoto(){
-      this.$refs.fileupLoad.click();
+    UpLoadFileorPhoto() {
+      /* this.$refs.fileupLoad.click(); */
+      this.dialogFormVisible = !this.dialogFormVisible; //弹框显示
+    },
+    tirggerFile() {
+      this.dialogFormVisible = false;
+      var that = this;
+      var value = "";
+      this.$socket.emit("TCPClientSendFile", {
+        Sender: {
+          name: that.MyInfo.username,
+          IP: that.MyInfo.IP,
+          port: that.MyInfo.port
+        },
+        receiver: {
+          name: that.menberInfo.memberName,
+          IP: that.menberInfo.IP,
+          port: that.menberInfo.port
+        },
+        content: "文件上传:" + that.form.path,
+        date: ""
+      });
+      that.loadingFile = this.$loading({
+        lock: true,
+        text: that.form.path + "文件正在传输",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)"
+      });
     }
   },
   sockets: {
@@ -468,7 +547,7 @@ export default {
         if (date.IPAddress == IP || IP == that.MyInfo.IP) {
           //通过IP判断这个人是否重复
           isChange = true;
-          that.usersList[index].user.name = value.User.name;  //重新登陆切换名字!
+          that.usersList[index].user.name = value.User.name; //重新登陆切换名字!
         }
       });
       if (isChange == false) {
@@ -522,6 +601,15 @@ export default {
         message: value.content,
         duration: 0
       });
+      for (let i = 0; i < this.SendContentList.length; i++) {
+        //修改端口号
+        if (
+          this.SendContentList[i].Sender.name != this.MyInfo.name &&
+          this.SendContentList[i].Sender.IP == this.MyInfo.IP
+        ) {
+          this.menberInfo.port = parseInt(this.SendContentList[i].Sender.port);
+        }
+      }
     },
     CilentLogout(value) {
       var that = this;
@@ -533,18 +621,40 @@ export default {
       });
       for (let i = 0; i < that.usersList.length; i++) {
         //用户列表去掉这个人!
-        console.log(value,that.usersList[i]);
-        if (that.usersList[i].IP == value.User.IPAddress && that.usersList[i].port == value.User.port) {
+        console.log(value, that.usersList[i]);
+        if (
+          that.usersList[i].IP == value.User.IPAddress &&
+          that.usersList[i].port == value.User.port
+        ) {
           that.usersList.splice(i, 1); //用户列表去掉这个人!
         }
       }
       for (let i = 0; i < that.SendContentNumList.length; i++) {
         //用户列表去掉这个人!
-        console.log(value,that.SendContentNumList[i]);
-        if (that.SendContentNumList[i].IP == value.User.IP && 8083 == value.User.port) {
+        console.log(value, that.SendContentNumList[i]);
+        if (
+          that.SendContentNumList[i].IP == value.User.IP &&
+          8083 == value.User.port
+        ) {
           that.SendContentNumList.splice(i, 1); //用户列表去掉这个人!
         }
       }
+    },
+    RemindReceiveFileCompleted(data) {
+      //提醒界面文件传输完成
+      this.$notify({
+        title: "成功",
+        message: data.Filename + "文件接收成功! 保存在:" + data.Location,
+        type: "success"
+      });
+    },
+    RemindSendFileCompleted(data) {
+      //提醒界面文件传输完成
+        this.$message({
+          message: '恭喜你，' + data.Filename + "文件发送成功!",
+          type: 'success'
+        });
+        this.loadingFile.close();
     }
   }
 };
